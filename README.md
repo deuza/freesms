@@ -34,8 +34,11 @@ apt install apache2 php php-curl certbot python3-certbot-apache
 ### Services externes
 
 **Compte Free Mobile** : 
-L'option "Notifications par SMS" doit être activée dans l'interface abonné Free (Gérer mon compte > Mes Options > Notifications par SMS). 
-Cette option fournit un identifiant utilisateur et une clé API nécessaires au fonctionnement du script.
+
+Allez sur le lien suivant : https://mobile.free.fr/account/mes-options
+
+L'option "Notifications par SMS" *doit être activée* dans l'interface abonné Free (Gérer mon compte > Mes Options > Notifications par SMS). 
+Cette option fournit une clé API nécessaires au fonctionnement du script.
 
 **Clé reCAPTCHA v2** : À obtenir sur https://www.google.com/recaptcha/admin
 - Type : reCAPTCHA v2 avec case à cocher "Je ne suis pas un robot"
@@ -122,12 +125,12 @@ Contenu de `/etc/sms-config/config.php` :
 ```php
 <?php
 // Configuration API Free Mobile
-define('FREE_USER', 'IDENTIFIANT_FREE');
-define('FREE_PASS', 'CLE_API_FREE');
+define('FREE_USER', '1849763');
+define('FREE_PASS', 'RtzdoSxfYxO');
 
 // Configuration reCAPTCHA
-define('RECAPTCHA_SITEKEY', 'SITEKEY_RECAPTCHA');
-define('RECAPTCHA_SECRET', 'SECRET_RECAPTCHA');
+define('RECAPTCHA_SITEKEY', '6LsguHHHDFLdfhiDHdiHhf');
+define('RECAPTCHA_SECRET', '6LdyJiiRidAIljJJidlruDgS_8JD_973JDYX');
 ?>
 ```
 
