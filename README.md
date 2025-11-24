@@ -231,9 +231,26 @@ Vérifier que :
 curl "https://smsapi.free-mobile.fr/sendmsg?user=XXXXX&pass=XXXXX&msg=test"
 ```
 
-## Licence
+## Limitations connues
 
-Creative Commons Version 1.0
+**Rate limiting basique** : Le système actuel limite à 10 SMS par heure par IP. Cette protection est basique et utilise des fichiers temporaires en `/tmp/`. Pour une protection plus robuste, voir la section TODO ci-dessous.
+
+**Pas de protection CSRF** : Le formulaire n'implémente pas de tokens CSRF. Pour un usage personnel avec peu de trafic, le reCAPTCHA suffit généralement.
+
+**Stockage des rate limits** : Les fichiers en `/tmp/` peuvent être supprimés au redémarrage du serveur. Les limites sont alors réinitialisées.
+
+**Caractères autorisés** : Le champ expéditeur accepte uniquement les caractères alphanumériques (ASCII + accents français), espaces, tirets, underscores et points. Les émojis et caractères Unicode étendus sont filtrés.
+
+## TODO / Améliorations futures
+
+- [ ] Implémenter un rate limiting avec SQLite pour persistance
+- [ ] Ajouter des tokens CSRF pour protection supplémentaire
+- [ ] Logger les tentatives d'envoi avec horodatage et IP
+- [ ] Implémenter un système de blacklist IP
+- [ ] Ajouter une interface d'administration basique
+- [ ] Support des émojis dans le champ expéditeur
+- [ ] Monitoring et alertes en cas d'abus détecté
+- [ ] Tests automatisés (PHPUnit)
 
 ## Sécurité
 
@@ -244,3 +261,7 @@ Creative Commons Version 1.0
 - Régénérer les clés API après tout partage public du code
 
 **Note** : Free Mobile impose ses propres limites de débit sur l'API. En cas d'abus, le service peut temporairement bloquer l'envoi de SMS (erreur 402).
+
+## Licence
+
+Creative Commons Version 1.0
