@@ -143,7 +143,7 @@ $button_left = rand(20, 70); // % de la zone définie
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Envoyer un SMS à DeuZa</title>
+    <title>M'envoyer un SMS</title>
     <style>
         body {
             background-color: #1a1a1a;
