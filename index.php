@@ -9,13 +9,13 @@ function check_rate_limit($ip) {
     $rate_file = '/tmp/sms_rate_' . md5($ip);
     $max_attempts = 10; // 10 SMS max
     $time_window = 3600; // Par heure
-
+    
     if (file_exists($rate_file)) {
         $data = json_decode(file_get_contents($rate_file), true);
         $recent_attempts = array_filter($data, function($timestamp) use ($time_window) {
             return (time() - $timestamp) < $time_window;
         });
-
+        
         if (count($recent_attempts) >= $max_attempts) {
             return false;
         }
@@ -23,7 +23,7 @@ function check_rate_limit($ip) {
     } else {
         $data = [time()];
     }
-
+    
     file_put_contents($rate_file, json_encode($data));
     return true;
 }
@@ -45,7 +45,7 @@ function validate_message($message) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $client_ip = $_SERVER['REMOTE_ADDR'];
-
+    
     // Rate limiting
     if (!check_rate_limit($client_ip)) {
         $response['message'] = 'Trop de tentatives. Réessayez dans 1 heure.';
@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $sender = isset($_POST['sender']) ? validate_sender($_POST['sender']) : '';
         $message = isset($_POST['message']) ? validate_message($_POST['message']) : '';
         $recaptcha_response = isset($_POST['g-recaptcha-response']) ? $_POST['g-recaptcha-response'] : '';
-
+        
         // Validation stricte côté serveur
         if (empty($sender)) {
             $response['message'] = 'Expéditeur invalide ou vide.';
@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'response' => $recaptcha_response,
                 'remoteip' => $client_ip
             ];
-
+            
             $options = [
                 'http' => [
                     'method' => 'POST',
@@ -82,23 +82,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'content' => http_build_query($verify_data)
                 ]
             ];
-
+            
             $context = stream_context_create($options);
             $verify_response = file_get_contents($verify_url, false, $context);
             $captcha_result = json_decode($verify_response);
-
+            
             if (!$captcha_result->success) {
                 $response['message'] = 'Échec de la vérification CAPTCHA.';
             } else {
                 // Construction du message complet
                 $full_message = "De: " . $sender . "\n" . $message;
-
+                
                 // Encodage URL
                 $encoded_msg = urlencode($full_message);
-
+                
                 // Envoi via API Free Mobile
                 $api_url = "https://smsapi.free-mobile.fr/sendmsg?user=" . FREE_USER . "&pass=" . FREE_PASS . "&msg=" . $encoded_msg;
-
+                
                 $ch = curl_init();
                 curl_setopt($ch, CURLOPT_URL, $api_url);
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -106,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 curl_exec($ch);
                 $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
                 curl_close($ch);
-
+                
                 // Gestion des codes retour
                 switch ($http_code) {
                     case 200:
@@ -222,6 +222,14 @@ $button_left = rand(20, 70); // % de la zone définie
         .captcha-container {
             margin: 20px 0;
         }
+        .char-counter {
+            color: #4caf50;
+            font-size: 0.9em;
+            margin-top: -15px;
+            margin-bottom: 15px;
+            text-align: right;
+            width: 90%;
+        }
         .random-button-zone {
             position: relative;
             height: 300px;
@@ -249,13 +257,13 @@ $button_left = rand(20, 70); // % de la zone définie
 </head>
 <body>
     <h1>M'envoyer un SMS</h1>
-
+    
     <?php if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($response['message'])): ?>
         <div class="message <?php echo $response['success'] ? 'success' : 'error'; ?>">
             <?php echo htmlspecialchars($response['message']); ?>
         </div>
     <?php endif; ?>
-
+    
     <?php if ($response['show_button']): ?>
         <div class="random-button-zone">
             <div class="random-button">
@@ -266,20 +274,49 @@ $button_left = rand(20, 70); // % de la zone définie
         <form method="POST">
             <label for="sender">Expéditeur :</label>
             <input type="text" id="sender" name="sender" maxlength="50" placeholder="Nom de l'expéditeur" required><br>
-
+            
             <label for="message">Message :</label>
-            <textarea id="message" name="message" rows="10" maxlength="918" placeholder="Votre message..." required></textarea><br>
-
+            <textarea id="message" name="message" rows="10" maxlength="918" placeholder="Votre message..." required></textarea>
+            <div class="char-counter">
+                <span id="charCount">918</span> caractères restants
+            </div>
+            <br>
+            
             <div class="captcha-container">
                 <div class="g-recaptcha" data-sitekey="<?php echo RECAPTCHA_SITEKEY; ?>"></div>
             </div>
-
+            
             <button type="submit">Envoyer</button>
         </form>
     <?php endif; ?>
-
+    
     <footer>
-        -=- Site sous licence Creative Commons Version 1.0 -=-
+               -=- Site sous licence Creative Commons Version 1.0 -=- <br>
+			-=-    By DeuZa    -=-
     </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const textarea = document.getElementById('message');
+        const charCount = document.getElementById('charCount');
+        const maxLength = 918;
+        
+        if (textarea && charCount) {
+            textarea.addEventListener('input', function() {
+                const remaining = maxLength - this.value.length;
+                charCount.textContent = remaining;
+                
+                // Change la couleur quand ça devient critique
+                if (remaining < 50) {
+                    charCount.style.color = '#ff0000';
+                } else if (remaining < 150) {
+                    charCount.style.color = '#ff9900';
+                } else {
+                    charCount.style.color = '#4caf50';
+                }
+            });
+        }
+    });
+    </script>
 </body>
 </html>
