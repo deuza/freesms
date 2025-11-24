@@ -110,11 +110,9 @@ Certbot modifiera automatiquement le VirtualHost pour activer HTTPS et forcer la
 
 ## Configuration
 
-### Méthode recommandée : Configuration externalisée
-
 Pour éviter d'exposer les credentials dans le webroot, créer un fichier de configuration séparé.
 
-#### Étape 1 : Créer le fichier de configuration
+### Étape 1 : Créer le fichier de configuration
 ```bash
 mkdir -p /etc/sms-config
 nano /etc/sms-config/config.php
@@ -133,7 +131,7 @@ define('RECAPTCHA_SECRET', 'SECRET_RECAPTCHA');
 ?>
 ```
 
-#### Étape 2 : Sécuriser les permissions
+### Étape 2 : Sécuriser les permissions
 ```bash
 chown root:www-data /etc/sms-config/config.php
 chmod 640 /etc/sms-config/config.php
